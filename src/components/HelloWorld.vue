@@ -93,7 +93,7 @@ export default {
   }
 }
 </script>
-
+//api 单独放文件
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h1, h2 {

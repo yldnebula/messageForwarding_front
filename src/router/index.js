@@ -1,21 +1,22 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '../components/HelloWorld'
-import Client from '../components/Client'
+// import Client from '../components/Client'
+import Login from '../views/Login'
+import Client2 from '../views/Client2'
 
 Vue.use(Router)
 
 export default new Router({
   routes: [
     {
-      path: '/1',
-      name: 'HelloWorld',
-      component: HelloWorld
+      path: '/',
+      name: 'Login',
+      component: Login
     },
     {
-      path: '/',
-      name: 'Client',
-      component: Client
+      path: '/client',
+      name: 'Client2',
+      component: Client2
     }
   ]
 })

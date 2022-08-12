@@ -71,11 +71,10 @@
 </template>
 
 <script>
-import Global from './Global'
+import Global from '../components/Global'
 // import {connect} from '../request/api'
 // import {getOnlineUser, connect, sendMsgAsyncApi, sendMsgSyncApi} from '../request/api.js'
 import {getOnlineUser, connect, sendMsgAsyncApi, sendMsgSyncApi} from '../request/indexApi'
-import axios from 'axios'
 
 export default {
   name: 'Client',
@@ -88,6 +87,10 @@ export default {
       userList: [],
       msgList: []
     }
+  },
+  created () {
+    let userName = this.$route.params.userId
+    console.log(userName)
   },
   methods: {
     sendSyncMsg () {
@@ -245,6 +248,13 @@ export default {
         alert('客户端未连接')
         return false
       }
+      if (this.target === '') {
+        this.$notify.error({
+          title: '错误',
+          message: '未输入目的用户'
+        })
+        return false
+      }
       if (this.userList.indexOf(this.target) === -1) {
         this.$notify.error({
           title: '错误',
@@ -253,11 +263,6 @@ export default {
         return false
       }
       return true
-    },
-    test () {
-      axios.get('http://localhost:8086/index/users').then((res) => {
-        console.log(res)
-      })
     }
   }
 }
