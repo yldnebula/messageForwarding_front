@@ -39,7 +39,7 @@ export default {
         that.$root.onAndOff = !that.$root.onAndOff
         console.log(Global.storage)
       }, function (evt) {
-        console.log(evt.data)
+        // console.log(evt.data)
         let res = JSON.parse(evt.data)
         if (res.type === 3 || res.type === 4) {
           that.$root.onAndOff = !that.$root.onAndOff
@@ -48,13 +48,18 @@ export default {
             message: res.text
           })
         } else {
-          Global.ON_MESSAGE(res.source, res.text)
+          Global.ON_MESSAGE(res.source, res.text, res.data)
           that.$root.onAndOff = !that.$root.onAndOff
           console.log(Global.storage)
           if (res.sync === true) {
             let name = res.source
-
-            that.$prompt('请您回复', '来自' + name + '的同步消息:' + res.text, {
+            let contentText = res.text
+            let isFile = false
+            if(res.data!=null&&res.data!==''){
+              contentText = '图片消息'
+              isFile = true
+            }
+            that.$prompt('请您回复', '来自' + name + '的同步消息:' + contentText, {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
             }).then(({value}) => {
@@ -64,6 +69,7 @@ export default {
               msg.source = msg.target
               msg.target = source
               msg.text = value
+              msg.data = null
               ws.send(JSON.stringify(msg))
               that.$message({
                 type: 'success',
@@ -83,14 +89,14 @@ export default {
                 message: '取消回复'
               })
             })
-            setTimeout(function (){
-              document.getElementsByClassName("el-message-box__wrapper")[0].attributes.getNamedItem('style').value+="display:none;";
-              document.getElementsByClassName("v-modal")[0].attributes.getNamedItem('style').value+="display:none;";
-              that.$message({
-                type: 'info',
-                message: '回复超时'
-              })
-            },30000)
+            // let timer = setTimeout(function (){
+            //   document.getElementsByClassName("el-message-box__wrapper")[0].attributes.getNamedItem('style').value+="display:none;";
+            //   document.getElementsByClassName("v-modal")[0].attributes.getNamedItem('style').value+="display:none;";
+            //   that.$message({
+            //     type: 'info',
+            //     message: '回复超时'
+            //   })
+            // },30000)
           }
         }
       }, function () {

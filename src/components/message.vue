@@ -15,16 +15,14 @@ export default {
   created () {
     this.currentId = Global.storage.currentId
     this.session = Global.storage.userStorage.find(item => item.id === Global.storage.currentId)
-    this.targetAvatar = this.session.avatar
-    this.selfAvatar = Global.storage.avatar
+    // this.targetAvatar = this.session.avatar
+    // this.selfAvatar = Global.storage.avatar
     this.storage = Global.storage
   },
-  methods: {
-
-  },
-  watch:{
-    '$root.currentId':{
-      handler(newId, oldId){
+  methods: {},
+  watch: {
+    '$root.currentId': {
+      handler (newId, oldId) {
         this.session = Global.storage.userStorage.find(item => item.id === newId)
         this.currentId = newId
         this.targetAvatar = this.session.avatar
@@ -61,9 +59,16 @@ export default {
           <span>{{ item.date | time }}</span>
         </p>
         <div class="main" :class="{ self: item.self }">
-<!--          <div v-html="item.self ? storage.avatar : item.avatar" class="avatar" style="width: 30px;height: 30px;"></div>-->
           <div v-html="item.self ? selfAvatar : targetAvatar" class="avatar"></div>
-          <div class="text">{{ item.content }}</div>
+          <img
+            :src="item.file"
+            alt
+            class="file"
+            v-if="item.file"
+            @load=""
+            preview="1"
+          />
+          <div class="text" v-else>{{ item.content }}</div>
         </div>
       </li>
     </ul>
@@ -101,6 +106,14 @@ export default {
   border-radius: 3px;
   width: 30px;
   height: 30px;
+}
+
+.message .file{
+  max-width: 330px;
+  max-height: 170px;
+  margin-top: 14px;
+  margin-left: 10px;
+  cursor: pointer;
 }
 
 .message .text {

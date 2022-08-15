@@ -7,15 +7,18 @@ export default {
   data () {
     return {
       message: '',
+      inputAsync: '',
+      inputSync: ''
     }
   },
   methods: {
-    sendSyncMsg () {
+    sendSyncMsg (e, data) {
       let that = this
       let msg = {
         text: that.message,
         source: Global.storage.userId,
         target: that.$root.currentId,
+        data: data,
         sync: true,
         response: false
       }
@@ -54,15 +57,16 @@ export default {
           Global.ON_MESSAGE(res_message.source, res_message.text)
         }
       })
-      Global.SEND_MESSAGE(that.$root.currentId, that.message)
+      Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
       that.message = ''
     },
-    sendAsyncMsg () {
+    sendAsyncMsg (e, data) {
       var that = this
       let msg = {
         text: that.message,
         source: Global.storage.userId,
         target: that.$root.currentId,
+        data: data,
         sync: false,
         response: false
       }
@@ -73,7 +77,7 @@ export default {
       }
       // eslint-disable-next-line no-undef
       sendMsgAsyncApi(msg).then((res) => {
-        Global.SEND_MESSAGE(that.$root.currentId, that.message)
+        Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
         that.message = ''
       })
     },
@@ -85,21 +89,44 @@ export default {
       }
       return true
     },
+    handleFileSync (){
+      alert('sync')
+    },
+    handleFileAsync (){
+      alert('async')
 
+    },
+    handleImg (e, imgUrl, isSync) {
+      isSync?this.sendSyncMsg(e,imgUrl):this.sendAsyncMsg(e,imgUrl)
+      // this.sendAsyncMsg(imgUrl)
+    },
+    handleFile(event, isSync){
+      let file = event.target.files[0]
+      let reader = new FileReader() // 创建读取文件对象
+      reader.readAsDataURL(file) // 发起异步请求，读取文件
+      reader.onload = (e) => {
+        // 文件读取完成后
+        // 读取完成后，将结果赋值给img的src
+        this.handleImg(e, e.target.result, isSync)
+        event.target.value = ''
+      }
+    }
   }
 }
 </script>
 
 <template>
   <div>
+    <div class="icon">
+      <label class="el-icon-picture iconfont icon-tupian" for="fileSync"></label>
+      <input type="file" style="display:none" id="fileSync" @change="handleFile($event, true)" />
+      <label class="el-icon-picture-outline iconfont icon-tupian" for="file"></label>
+      <input type="file" style="display:none" id="file" @change="handleFile($event, false)" />
+      <i class="iconfont el-icon-sort-up icon-tupian" v-on:click="sendAsyncMsg($event)" ></i>
+      <i class="iconfont el-icon-sort icon-tupian" v-on:click="sendSyncMsg($event)" ></i>
+    </div>
     <div class="text">
       <textarea placeholder="请输入发送内容" v-model="message"></textarea>
-    </div>
-    <div class="btn">
-      <el-row>
-        <el-button v-on:click="sendAsyncMsg" type="success" size="mini" icon="el-icon-sort-up" circle></el-button>
-        <el-button v-on:click="sendSyncMsg" type="primary" size="mini" icon="el-icon-sort" circle></el-button>
-      </el-row>
     </div>
   </div>
 
@@ -116,7 +143,25 @@ export default {
   margin-right: 10px;
   padding-bottom: 100px;
 }
+.icon{
+  height: 25px;
+  padding-top: 6px;
+  display: flex;
+  float: right;
+}
 
+.icon .iconfont {
+  float: right;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.icon .icon-tupian{
+  font-size: 20px;
+  padding: 0 6px;
+  cursor: pointer;
+}
 .text textarea {
   padding-top: 10px;
   height: 120%;
