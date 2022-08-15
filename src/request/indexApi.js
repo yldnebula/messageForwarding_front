@@ -1,11 +1,12 @@
 import {service} from './api'
 
-export function sendMsgSyncApi (data) {
-  return service.post('/index/sendSync', data)
+export function sendMsgSyncApi (data, limit) {
+
+  return limit?service.post('/index/sendSyncLimit', data):service.post('/index/sendSync', data)
 }
 
-export function sendMsgAsyncApi (data) {
-  return service.post('/index/sendAsync', data)
+export function sendMsgAsyncApi (data, limit) {
+  return limit?service.post('/index/sendAsyncLimit', data):service.post('/index/sendAsync', data)
 }
 
 export function getOnlineUser () {

@@ -12,7 +12,7 @@ export default {
     }
   },
   methods: {
-    sendSyncMsg (e, data) {
+    sendSyncMsg (e, data, limit) {
       let that = this
       let msg = {
         text: that.message,
@@ -33,7 +33,7 @@ export default {
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       })
-      sendMsgSyncApi(msg).then((res) => {
+      sendMsgSyncApi(msg, limit).then((res) => {
         console.log(res)
         loading.close()
         res = res.data
@@ -57,10 +57,17 @@ export default {
           Global.ON_MESSAGE(res_message.source, res_message.text)
         }
       })
-      Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
+      if(res.data.code === 1){
+        Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
+      }else{
+        that.$message({
+          type: 'error',
+          message: res.data.msg
+        })
+      }
       that.message = ''
     },
-    sendAsyncMsg (e, data) {
+    sendAsyncMsg (e, data, limit) {
       var that = this
       let msg = {
         text: that.message,
@@ -76,8 +83,16 @@ export default {
         return
       }
       // eslint-disable-next-line no-undef
-      sendMsgAsyncApi(msg).then((res) => {
-        Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
+      sendMsgAsyncApi(msg, limit).then((res) => {
+        console.log(res)
+        if(res.data.code === 1){
+          Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
+        }else{
+          that.$message({
+            type: 'error',
+            message: res.data.msg
+          })
+        }
         that.message = ''
       })
     },
@@ -97,7 +112,7 @@ export default {
 
     },
     handleImg (e, imgUrl, isSync) {
-      isSync?this.sendSyncMsg(e,imgUrl):this.sendAsyncMsg(e,imgUrl)
+      isSync?this.sendSyncMsg(e,imgUrl,true):this.sendAsyncMsg(e,imgUrl,true)
       // this.sendAsyncMsg(imgUrl)
     },
     handleFile(event, isSync){
