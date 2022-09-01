@@ -12,12 +12,25 @@ export default {
   name: 'Client2',
   components: {Card, List, textContent, Message},
   mounted () {
-    this.username = this.$route.params.userId
+    let that = this;
+    this.username = this.$route.params.userId;
+    this.heartBeatMsg = {
+      text: '0x9',
+      source: that.username,
+      sync: false,
+      response: false
+    }
     this.clickConnect()
+
   },
   data () {
     return {
       username: '',
+      timeout: 3000,
+      timeoutObj: null,
+      serverTimeoutObj: null,
+      heartBeatMsg :{}
+
     }
   },
   methods: {
@@ -28,6 +41,8 @@ export default {
       connect(this.username, function (websocket) {
         Global.ws = websocket
         ws = websocket
+        console.log(Global.storage.userId)
+        that.heartBeat(that.heartBeatMsg)
       }, function () {
         console.log('连接失败')
       }, function () {
@@ -41,7 +56,9 @@ export default {
       }, function (evt) {
         // console.log(evt.data)
         let res = JSON.parse(evt.data)
-        if (res.type === 3 || res.type === 4) {
+        if(res.type === 1){
+          that.heartBeat(that.heartBeatMsg)
+        }else if (res.type === 3 || res.type === 4) {
           that.$root.onAndOff = !that.$root.onAndOff
           that.$message({
             type: 'success',
@@ -89,19 +106,19 @@ export default {
                 message: '取消回复'
               })
             })
-            // let timer = setTimeout(function (){
-            //   document.getElementsByClassName("el-message-box__wrapper")[0].attributes.getNamedItem('style').value+="display:none;";
-            //   document.getElementsByClassName("v-modal")[0].attributes.getNamedItem('style').value+="display:none;";
-            //   that.$message({
-            //     type: 'info',
-            //     message: '回复超时'
-            //   })
-            // },30000)
           }
         }
       }, function () {
       })
     },
+    heartBeat (msg){
+      this.timeoutObj && clearTimeout(this.timeoutObj);
+      this.timeoutObj = setInterval(() => {
+        /*************这里发送一个心跳，后端收到后，返回一个心跳消息*******/
+        console.log('heartbeat')
+        Global.ws.send(JSON.stringify(msg))
+      }, this.timeout)
+    }
   }
 }
 </script>

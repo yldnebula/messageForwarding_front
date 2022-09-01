@@ -27,7 +27,7 @@ export default {
       if (!this.checkData()) {
         return
       }
-      const loading = this.$loading({
+      const loading = that.$loading({
         lock: true,
         text: 'Loading',
         spinner: 'el-icon-loading',
@@ -35,37 +35,39 @@ export default {
       })
       sendMsgSyncApi(msg, limit).then((res) => {
         console.log(res)
-        loading.close()
-        res = res.data
-        // eslint-disable-next-line camelcase
-        let res_message = res.data
-        if (res.msg === 'timeout') {
-          that.$notify.error({
-            title: '错误',
-            message: '对方回复超时'
-          })
-        } else if (res_message.type === 2) { //
-          that.$notify.error({
-            title: '错误',
-            message: '对方取消回复'
-          })
-        } else {
+        if(res.data.code === 1){
+          Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
+          loading.close()
+          that.message = ''
+          res = res.data
+          // eslint-disable-next-line camelcase
+          let res_message = res.data
+          if (res.msg === 'timeout') {
+            that.$notify.error({
+              title: '错误',
+              message: '对方回复超时'
+            })
+          } else if (res_message.type === 2) { //
+            that.$notify.error({
+              title: '错误',
+              message: '对方取消回复'
+            })
+          } else {
+            that.$message({
+              message: '收到回复',
+              type: 'success'
+            })
+            Global.ON_MESSAGE(res_message.source, res_message.text)
+          }
+        }else{
           that.$message({
-            message: '收到回复',
-            type: 'success'
+            type: 'error',
+            message: res.data.msg
           })
-          Global.ON_MESSAGE(res_message.source, res_message.text)
+          loading.close()
         }
       })
-      if(res.data.code === 1){
-        Global.SEND_MESSAGE(that.$root.currentId, that.message, data)
-      }else{
-        that.$message({
-          type: 'error',
-          message: res.data.msg
-        })
-      }
-      that.message = ''
+
     },
     sendAsyncMsg (e, data, limit) {
       var that = this
@@ -116,14 +118,16 @@ export default {
       // this.sendAsyncMsg(imgUrl)
     },
     handleFile(event, isSync){
+      let that = this;
       let file = event.target.files[0]
       let reader = new FileReader() // 创建读取文件对象
       reader.readAsDataURL(file) // 发起异步请求，读取文件
       reader.onload = (e) => {
         // 文件读取完成后
         // 读取完成后，将结果赋值给img的src
-        this.handleImg(e, e.target.result, isSync)
+        let imgUrl = e.target.result
         event.target.value = ''
+        that.handleImg(e, imgUrl, isSync)
       }
     }
   }
